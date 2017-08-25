@@ -2,7 +2,9 @@
 
 var fs = require('fs'),
     path = require('path'),
-    zips = {}, str,
+    bfj = require('bfj'),
+    zips = {},
+    str,
     data = fs.readFileSync('./free-zipcode-database.csv', 'utf8').replace(/\r/g, '').split('\n');
 
 data.shift();
@@ -51,8 +53,20 @@ for (var i in zips) {
 
     stateMap[item.state].push(item.zip);
 }
+bfj.stringify(zips)
+  .then(json => {
+    str = 'exports.codes = ' + json + ';\n';
+    
+    bfj.stringify(stateMap)
+      .then(stateJson => {
+        str += 'exports.codes = ' + stateJson + ';\n';
+        fs.writeFileSync(path.join('../', 'lib', 'codes.js'), str, 'utf8');
+      })
+      .catch(error => {
+        console.log(error);
+      });
+})
+.catch(error => {
+    console.log(error);
+});
 
-str = 'exports.codes = ' + JSON.stringify(zips) + ';\n';
-str += 'exports.stateMap = ' + JSON.stringify(stateMap) + ';\n';
-
-fs.writeFileSync(path.join('../', 'lib', 'codes.js'), str, 'utf8');

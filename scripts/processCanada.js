@@ -48,7 +48,19 @@ for (var i in zips) {
     stateMap[item.state].push(item.zip);
 }
 
-str = 'exports.codes = ' + JSON.stringify(zips) + ';\n';
-str += 'exports.stateMap = ' + JSON.stringify(stateMap) + ';\n';
-
-fs.writeFileSync(path.join('../', 'lib', 'codesCanada.js'), str, 'utf8');
+bfj.stringify(zips)
+  .then(json => {
+    str = 'exports.codes = ' + json + ';\n';
+    
+    bfj.stringify(stateMap)
+      .then(stateJson => {
+        str += 'exports.codes = ' + stateJson + ';\n';
+        fs.writeFileSync(path.join('../', 'lib', 'codesCanada.js'), str, 'utf8');
+      })
+      .catch(error => {
+        console.log(error);
+      });
+})
+.catch(error => {
+    console.log(error);
+});
